@@ -17,3 +17,8 @@ if __name__ == "__main__":
     instance = MyModel(name="Test Instance")
     instance.save()  # This triggers the post_save signal
     print("This line prints after the signal receiver completes.")
+
+output:-
+Signal received! Instance: Test Instance
+This line prints after the signal receiver completes.
+
