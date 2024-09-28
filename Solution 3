@@ -1,1 +1,38 @@
+Yes, by default, Django signals run in the same database transaction as the caller. 
+This means that if a signal is triggered during a transaction (like a model save), the receivers will also be executed within that transaction context. 
 
+Code snippet:-
+from django.db import models, transaction
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.exceptions import ValidationError
+
+# Sample model
+class MyModel(models.Model):
+    name = models.CharField(max_length=100)
+
+# Signal receiver
+@receiver(post_save, sender=MyModel)
+def my_signal_receiver(sender, instance, created, **kwargs):
+    print(f"Signal received! Instance: {instance.name}")
+    if created:
+        # Raise an exception to simulate a rollback
+        raise ValidationError("Simulating an error to trigger rollback.")
+
+# Example usage
+if __name__ == "__main__":
+    try:
+        with transaction.atomic():
+            instance = MyModel(name="Test Instance")
+            instance.save()  # This triggers the post_save signal
+    except ValidationError as e:
+        print("Caught an exception:", e)
+
+    # Check if the instance was saved
+    exists = MyModel.objects.filter(name="Test Instance").exists()
+    print("Instance exists in database:", exists)
+
+output:-
+Signal received! Instance: Test Instance
+Caught an exception: Simulating an error to trigger rollback.
+Instance exists in database: False
