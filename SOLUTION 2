@@ -1,1 +1,33 @@
+Yes, Django signals run in the same thread as the caller by default.
+This means that when a signal is sent, the connected receiver functions execute in the same thread that sent the signal, without creating any new threads.
+CODE SNIPPET :-
 
+import threading
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.db import models
+
+# Sample model
+class MyModel(models.Model):
+    name = models.CharField(max_length=100)
+
+# Signal receiver
+@receiver(post_save, sender=MyModel)
+def my_signal_receiver(sender, instance, created, **kwargs):
+    print(f"Signal received in thread: {threading.current_thread().name} - Instance: {instance.name}")
+
+# Function to simulate saving in a new thread
+def save_instance_in_thread():
+    instance = MyModel(name="Test Instance")
+    instance.save()  # This triggers the post_save signal
+
+# Example usage
+if __name__ == "__main__":
+    print(f"Main thread: {threading.current_thread().name}")
+
+    # Create and start a new thread
+    thread = threading.Thread(target=save_instance_in_thread)
+    thread.start()
+    thread.join()  # Wait for the thread to complete
+
+    print("This line prints after the thread completes.")
