@@ -31,3 +31,8 @@ if __name__ == "__main__":
     thread.join()  # Wait for the thread to complete
 
     print("This line prints after the thread completes.")
+
+output:-
+Main thread: MainThread
+Signal received in thread: Thread-1 - Instance: Test Instance
+This line prints after the thread completes.
